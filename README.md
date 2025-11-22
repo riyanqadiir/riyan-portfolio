@@ -1,17 +1,15 @@
-# 🚀 Riyan Qadir — Developer Portfolio
+# Riyan Qadir — Developer Portfolio
 
 A modern, high-performance, and fully-responsive developer portfolio showcasing my skills, projects, and professional journey. Built from the ground up using a contemporary **React + TypeScript** stack, it features smooth user experience, robust backend integration, and optimal deployment.
 
-🔗 **Live Website:** https://riyan-portfolio.vercel.app  
+🔗 **Live Website:** [Riyan Portfolio](https://riyan-portfolio.vercel.app)  
 🔗 **GitHub Repo:** [Riyan Portfolio](https://github.com/riyanqadiir/riyan-portfolio)
 
----
-
-## 💡 Overview & Features
+## Overview & Features
 
 This portfolio is designed to be a fast and engaging showcase, highlighting my technical expertise with a clean, professional aesthetic.
 
-### Key Features ✨
+### Key Features
 
 * **Responsive & Adaptive:** Fully functional and visually appealing on all devices (mobile, tablet, and desktop).
 * **Dual-Theme Mode:** Seamless **Dark / Light mode** toggle for user preference.
@@ -28,9 +26,8 @@ This portfolio is designed to be a fast and engaging showcase, highlighting my t
     * `sitemap.xml`
 * **Performance:** Hosted on **Vercel** leveraging automatic caching, CDN, and build optimizations for top-tier speed.
 
----
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Category | Technology | Purpose |
 | :--- | :--- | :--- |
@@ -43,9 +40,8 @@ This portfolio is designed to be a fast and engaging showcase, highlighting my t
 | **Backend/API** | **Brevo (formerly Sendinblue)** | Powers the contact form's email functionality. |
 | **Icons** | **FontAwesome** | Professional and versatile icon library. |
 
----
 
-## 🚀 Getting Started
+## Getting Started
 
 Follow these steps to set up and run the portfolio locally.
 
@@ -76,8 +72,7 @@ Follow these steps to set up and run the portfolio locally.
     ```
     The application will be available at `http://localhost:3000`.
 
----
 
-## 🙌 Credits
+## Credits
 
 This project is a heavily improved and rebuilt version by **Riyan Qadir**, based on the original concept by [Yuji Sato](https://github.com/yujisatojr/).
