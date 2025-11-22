@@ -3,32 +3,32 @@
 
   <!-- Home -->
   <url>
-    <loc>https://riyanqadiir.vercel.app/</loc>
+    <loc>https://riyan-portfolio.vercel.app/</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <!-- Expertise -->
   <url>
-    <loc>https://riyanqadiir.vercel.app/#expertise</loc>
+    <loc>https://riyan-portfolio.vercel.app/#expertise</loc>
     <changefreq>monthly</changefreq>
   </url>
 
   <!-- History -->
   <url>
-    <loc>https://riyanqadiir.vercel.app/#history</loc>
+    <loc>https://riyan-portfolio.vercel.app/#history</loc>
     <changefreq>monthly</changefreq>
   </url>
 
   <!-- Projects -->
   <url>
-    <loc>https://riyanqadiir.vercel.app/#projects</loc>
+    <loc>https://riyan-portfolio.vercel.app/#projects</loc>
     <changefreq>monthly</changefreq>
   </url>
 
   <!-- Contact -->
   <url>
-    <loc>https://riyanqadiir.vercel.app/#contact</loc>
+    <loc>https://riyan-portfolio.vercel.app/#contact</loc>
     <changefreq>monthly</changefreq>
   </url>
 

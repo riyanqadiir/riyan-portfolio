@@ -2,8 +2,8 @@
 
 A modern, high-performance, and fully-responsive developer portfolio showcasing my skills, projects, and professional journey. Built from the ground up using a contemporary **React + TypeScript** stack, it features smooth user experience, robust backend integration, and optimal deployment.
 
-🔗 **Live Website:** https://riyanqadiir.vercel.app  
-🔗 **GitHub Repo:** [Add GitHub Link Here]
+🔗 **Live Website:** https://riyan-portfolio.vercel.app  
+🔗 **GitHub Repo:** [Riyan Portfolio](https://github.com/riyanqadiir/riyan-portfolio)
 
 ---
 
@@ -53,8 +53,8 @@ Follow these steps to set up and run the portfolio locally.
 
 1.  **Clone the repository:**
     ```bash
-    git clone [Add GitHub Link Here]
-    cd [repository-name]
+    git clone https://github.com/riyanqadiir/riyan-portfolio.git
+    cd riyan-portfolio
     ```
 
 2.  **Install dependencies:**
@@ -66,9 +66,8 @@ Follow these steps to set up and run the portfolio locally.
     Create a `.env` file in the root directory and add your Brevo API key and configuration:
     ```
     # Example:
-    VITE_BREVO_API_KEY=your_brevo_api_key_here
-    VITE_BREVO_SENDER_EMAIL=your_verified_sender_email
-    VITE_BREVO_SENDER_NAME="Riyan Qadir"
+    REACT_APP_BREVO_API_KEY=your_brevo_api_key_here
+    REACT_APP_BREVO_EMAIL=your_verified_sender_email
     ```
 
 4.  **Run the application:**
