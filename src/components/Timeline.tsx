@@ -1,67 +1,74 @@
 import React from "react";
-import '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBriefcase } from '@fortawesome/free-solid-svg-icons';
-import { VerticalTimeline, VerticalTimelineElement }  from 'react-vertical-timeline-component';
-import 'react-vertical-timeline-component/style.min.css';
-import '../assets/styles/Timeline.scss'
+import { VerticalTimeline, VerticalTimelineElement } from "react-vertical-timeline-component";
+import "react-vertical-timeline-component/style.min.css";
+import "../assets/styles/Timeline.scss";
 
 function Timeline() {
   return (
     <div id="history">
       <div className="items-container">
         <h1>Career History</h1>
+
         <VerticalTimeline>
+
+          {/* Web Developer */}
           <VerticalTimelineElement
             className="vertical-timeline-element--work"
-            contentStyle={{ background: 'white', color: 'rgb(39, 40, 34)' }}
-            contentArrowStyle={{ borderRight: '7px solid  white' }}
-            date="2022 - present"
-            iconStyle={{ background: '#5000ca', color: 'rgb(39, 40, 34)' }}
+            date="Apr 2024 – Apr 2025"
+            iconStyle={{ background: "#5000ca", color: "#fff" }}
             icon={<FontAwesomeIcon icon={faBriefcase} />}
           >
-            <h3 className="vertical-timeline-element-title">Technology Consultant</h3>
-            <h4 className="vertical-timeline-element-subtitle">Dallas, TX</h4>
+            <h3 className="vertical-timeline-element-title">Web Developer</h3>
+            <h4 className="vertical-timeline-element-subtitle">The Global IT Solutions</h4>
             <p>
-              Full-stack Web Development, GenAI/LLM, Project Management, Business Development
+              Developed the official company website, improved responsiveness and design structure,
+              built reusable frontend components, and collaborated with the UI/UX and backend teams
+              for API integration.
             </p>
           </VerticalTimelineElement>
+
+          {/* Trainee Software Engineer */}
           <VerticalTimelineElement
             className="vertical-timeline-element--work"
-            date="2020 - 2022"
-            iconStyle={{ background: '#5000ca', color: 'rgb(39, 40, 34)' }}
+            date="Jun 2023 – Aug 2024"
+            iconStyle={{ background: "#5000ca", color: "#fff" }}
             icon={<FontAwesomeIcon icon={faBriefcase} />}
           >
-            <h3 className="vertical-timeline-element-title">Full Stack Engineer</h3>
-            <h4 className="vertical-timeline-element-subtitle">Laie, HI</h4>
+            <h3 className="vertical-timeline-element-title">Trainee Software Engineer</h3>
+            <h4 className="vertical-timeline-element-subtitle">SeeBiz Pvt. Ltd</h4>
             <p>
-              Frontend Development, Backend Development, User Experience, Team Leading
+              Assisted in MERN stack development, wrote modular and scalable code, participated in
+              agile meetings, and contributed to code reviews and team collaboration.
             </p>
           </VerticalTimelineElement>
+
+          {/* Education */}
           <VerticalTimelineElement
-            className="vertical-timeline-element--work"
-            date="2021 - 2021"
-            iconStyle={{ background: '#5000ca', color: 'rgb(39, 40, 34)' }}
+            className="vertical-timeline-element--education"
+            date="2022 – Present"
+            iconStyle={{ background: "#5000ca", color: "#fff" }}
             icon={<FontAwesomeIcon icon={faBriefcase} />}
           >
-            <h3 className="vertical-timeline-element-title">Staff Engineer Intern</h3>
-            <h4 className="vertical-timeline-element-subtitle">Laie, HI</h4>
+            <h3 className="vertical-timeline-element-title">BS Software Engineering</h3>
+            <h4 className="vertical-timeline-element-subtitle">Lahore Garrison University</h4>
             <p>
-              Full-stack Development, API Development, User Experience
+              7th semester — focusing on full-stack development, databases, and software engineering
+              fundamentals.
             </p>
           </VerticalTimelineElement>
+
           <VerticalTimelineElement
-            className="vertical-timeline-element--work"
-            date="2020 - 2020"
-            iconStyle={{ background: '#5000ca', color: 'rgb(39, 40, 34)' }}
+            className="vertical-timeline-element--education"
+            date="2022"
+            iconStyle={{ background: "#5000ca", color: "#fff" }}
             icon={<FontAwesomeIcon icon={faBriefcase} />}
           >
-            <h3 className="vertical-timeline-element-title">Data Analyst Intern</h3>
-            <h4 className="vertical-timeline-element-subtitle">Tokyo, Japan</h4>
-            <p>
-              Automation, Data Governance, Statistical Analysis
-            </p>
+            <h3 className="vertical-timeline-element-title">Intermediate (ICS)</h3>
+            <h4 className="vertical-timeline-element-subtitle">Aspire Group of Colleges</h4>
           </VerticalTimelineElement>
+
         </VerticalTimeline>
       </div>
     </div>

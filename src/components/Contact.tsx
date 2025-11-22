@@ -1,52 +1,67 @@
-import React, { useRef, useState } from 'react';
-import '../assets/styles/Contact.scss';
-// import emailjs from '@emailjs/browser';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import SendIcon from '@mui/icons-material/Send';
-import TextField from '@mui/material/TextField';
+import React, { useState } from "react";
+import "../assets/styles/Contact.scss";
 
 function Contact() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [name, setName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [message, setMessage] = useState<string>('');
-
-  const [nameError, setNameError] = useState<boolean>(false);
-  const [emailError, setEmailError] = useState<boolean>(false);
-  const [messageError, setMessageError] = useState<boolean>(false);
-
-  const form = useRef();
-
-  const sendEmail = (e: any) => {
+  const sendEmail = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    setNameError(name === '');
-    setEmailError(email === '');
-    setMessageError(message === '');
+    if (!name || !email || !message) {
+      alert("Please fill out all fields.");
+      return;
+    }
 
-    /* Uncomment below if you want to enable the emailJS */
+    const sender = process.env.REACT_APP_BREVO_EMAIL;
+    const apiKey = process.env.REACT_APP_BREVO_API_KEY;
 
-    // if (name !== '' && email !== '' && message !== '') {
-    //   var templateParams = {
-    //     name: name,
-    //     email: email,
-    //     message: message
-    //   };
+    if (!sender || !apiKey) {
+      alert("Email service is not configured.");
+      return;
+    }
 
-    //   console.log(templateParams);
-    //   emailjs.send('service_id', 'template_id', templateParams, 'api_key').then(
-    //     (response) => {
-    //       console.log('SUCCESS!', response.status, response.text);
-    //     },
-    //     (error) => {
-    //       console.log('FAILED...', error);
-    //     },
-    //   );
-    //   setName('');
-    //   setEmail('');
-    //   setMessage('');
-    // }
+    setLoading(true);
+
+    try {
+      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "api-key": apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sender: { email: sender },
+          to: [{ email: sender }],
+          subject: "New Portfolio Contact Submission",
+          htmlContent: `
+            <h3>New message from your portfolio</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email / Phone:</strong> ${email}</p>
+            <p><strong>Message:</strong></p>
+            <p>${message}</p>
+          `,
+        }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error(errText);
+        alert("Failed to send message.");
+      } else {
+        alert("Message sent successfully!");
+        setName("");
+        setEmail("");
+        setMessage("");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,59 +69,92 @@ function Contact() {
       <div className="items-container">
         <div className="contact_wrapper">
           <h1>Contact Me</h1>
-          <p>Got a project waiting to be realized? Let's collaborate and make it happen!</p>
-          <Box
-            ref={form}
-            component="form"
-            noValidate
-            autoComplete="off"
-            className='contact-form'
-          >
-            <div className='form-flex'>
-              <TextField
-                required
-                id="outlined-required"
-                label="Your Name"
-                placeholder="What's your name?"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
+          <p>
+            Got a project waiting to be realized? Let's collaborate and make it
+            happen!
+          </p>
+
+          <form className="contact-form" onSubmit={sendEmail} noValidate>
+            <div className="form-flex">
+              <div className="field">
+                <label htmlFor="name">Your Name*</label>
+                <input
+                  id="name"
+                  type="text"
+                  placeholder="What's your name?"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: "4px",
+                    border: "2px solid #5000ca",
+                    backgroundColor: "#ffffff",
+                    color: "#000000",
+                    fontSize: "14px",
+                  }}
+                />
+              </div>
+
+              <div className="field">
+                <label htmlFor="email">Email / Phone*</label>
+                <input
+                  id="email"
+                  type="text"
+                  placeholder="How can I reach you?"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: "4px",
+                    border: "2px solid #5000ca",
+                    backgroundColor: "#ffffff",
+                    color: "#000000",
+                    fontSize: "14px",
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="field">
+              <label htmlFor="message">Message*</label>
+              <textarea
+                id="message"
+                placeholder="Send me any inquiries or questions"
+                rows={8}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: "4px",
+                  border: "2px solid #5000ca",
+                  backgroundColor: "#ffffff",
+                  color: "#000000",
+                  fontSize: "14px",
+                  resize: "vertical",
                 }}
-                error={nameError}
-                helperText={nameError ? "Please enter your name" : ""}
-              />
-              <TextField
-                required
-                id="outlined-required"
-                label="Email / Phone"
-                placeholder="How can I reach you?"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                }}
-                error={emailError}
-                helperText={emailError ? "Please enter your email or phone number" : ""}
               />
             </div>
-            <TextField
-              required
-              id="outlined-multiline-static"
-              label="Message"
-              placeholder="Send me any inquiries or questions"
-              multiline
-              rows={10}
-              className="body-form"
-              value={message}
-              onChange={(e) => {
-                setMessage(e.target.value);
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                marginTop: "10px",
+                padding: "10px 24px",
+                borderRadius: "4px",
+                border: "none",
+                backgroundColor: "#ffffff",
+                color: "#050f0b",
+                fontWeight: 600,
+                cursor: loading ? "not-allowed" : "pointer",
               }}
-              error={messageError}
-              helperText={messageError ? "Please enter the message" : ""}
-            />
-            <Button variant="contained" endIcon={<SendIcon />} onClick={sendEmail}>
-              Send
-            </Button>
-          </Box>
+            >
+              {loading ? "Sending..." : "SEND"}
+            </button>
+          </form>
         </div>
       </div>
     </div>

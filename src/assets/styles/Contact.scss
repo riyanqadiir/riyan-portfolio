@@ -6,26 +6,6 @@
 
 .contact-form {
   padding-top: 20px;
-
-  button {
-    float: right;
-    background-color: white;
-    color: #050f0b;
-  }
-
-  button:hover {
-    background-color: #5000ca;
-    color: white;
-  }
-
-  fieldset {
-    background-color: white;
-  }
-}
-
-label {
-  font-size: 1.2rem;
-  font-family: 'DomaineDispNar-Medium', sans-serif;
 }
 
 .form-flex {
@@ -34,15 +14,21 @@ label {
   padding-bottom: 15px;
 }
 
-.form-flex .MuiFormControl-root {
+.form-flex .field {
   width: 100%;
 }
 
 form {
-  width: 100% !important;
+  width: 100%;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
 }
 
 .body-form {
-  width: 100% !important;
-  margin-bottom: 15px !important;
+  width: 100%;
+  margin-bottom: 15px;
 }
