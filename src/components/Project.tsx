@@ -66,7 +66,7 @@ function Project() {
         </div>
 
         {/* 🍽 Next.js Food Project */}
-        <div className="project">
+        {/* <div className="project">
           <a
             href="https://next-js-next-level-food.vercel.app/"
             target="_blank"
@@ -92,7 +92,7 @@ function Project() {
             learning project to strengthen skills in Next.js, React components,
             API routes, and page architecture.
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
