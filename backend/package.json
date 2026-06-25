@@ -2,6 +2,9 @@
   "name": "riyan-portfolio-backend",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "description": "Vercel serverless backend for Riyan's portfolio — Express-free Node.js functions",
   "scripts": {
     "dev": "tsx scripts/dev-server.ts",
