@@ -5,7 +5,7 @@
 One Vercel project deploys everything:
 
 1. **Frontend** — static files from `frontend/build`
-2. **API** — serverless functions from root `api/**/*.ts`
+2. **API** — single serverless function at `api/index.ts` (all `/api/*` routes)
 
 Root `vercel.json` controls install, build, output, rewrites, and function settings.
 
@@ -98,14 +98,14 @@ Browser request                 Vercel routing
 ─────────────────               ──────────────
 GET  /                  →       frontend/build/index.html
 GET  /admin             →       frontend/build/index.html  (React Router)
-GET  /api/projects      →       api/projects/index.ts
-POST /api/auth/login    →       api/auth/login.ts
-POST /api/resume/upload →       api/resume/upload.ts
+GET  /api/projects      →       /api/index?path=projects
+POST /api/auth/login    →       /api/index?path=auth/login
+POST /api/resume/upload →       /api/index?path=resume/upload
 ```
 
 Rewrites in `vercel.json`:
 
-- `/api/(.*)` → `/api/$1` (serverless functions)
+- `/api/(.*)` → `/api/index?path=$1` (single serverless function)
 - everything else → `/index.html` (SPA)
 
 ## What gets installed on build
@@ -145,8 +145,8 @@ Vercel → Project → Settings → Domains → add your domain. No code changes
 | Error | Fix |
 |-------|-----|
 | `Function Runtimes must have a valid version` | Do not set `"runtime": "@vercel/node@3"` in `vercel.json` — use `"engines": { "node": "24.x" }` in `package.json` |
-| `pattern ... doesn't match any Serverless Functions inside the api directory` | API handlers must live in root `api/`, not `backend/api/` |
-| API returns 404 on production | Confirm Root Directory is `.` and env vars are set |
+| `pattern ... doesn't match any Serverless Functions inside the api directory` | API must use root `api/index.ts`, not `backend/api/` or multiple route files |
+| API returns 404 on production | Confirm Root Directory is `.`, rewrite is `/api/(.*)` → `/api/index?path=$1`, and env vars are set |
 | Build succeeds but CMS fails | Check Vercel env vars match `backend/.env.example` |
 
 ## Optional: split frontend and backend

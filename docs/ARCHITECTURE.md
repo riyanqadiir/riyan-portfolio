@@ -31,21 +31,22 @@ react-portfolio-template/
 └── README.md
 ```
 
-### Why two folders: `api/` and `backend/`?
+### Why `api/` and `backend/`?
 
-Vercel **only deploys serverless functions from a root `/api` directory**. Business logic does not belong mixed into route files.
+Vercel deploys serverless functions from the root `/api` directory. This project uses **one function** (`api/index.ts`) with a rewrite so all `/api/*` URLs work on the Hobby plan (12-function limit).
 
 | Folder | Purpose | Deployed? |
 |--------|---------|-----------|
-| `api/` | Thin handlers: parse request → call lib → return response | **Yes** |
-| `backend/` | Reusable logic, DB models, local dev server | **No** (imported by `api/`) |
+| `api/index.ts` | Router: parse path → call handler → return response | **Yes** (1 function) |
+| `backend/handlers/` | Business logic per resource (projects, resume, etc.) | **No** |
+| `backend/lib/` + `models/` | DB, auth, S3, schemas | **No** |
 
-Example import in a handler:
+Example import:
 
 ```typescript
-// api/projects/index.ts
-import { connectDB } from '../../backend/lib/db';
-import Project from '../../backend/models/Project';
+// api/index.ts
+import { handleProjectsRoot } from '../backend/handlers/projects';
+import { connectDB } from '../backend/lib/db';
 ```
 
 ## High-level flow
@@ -59,10 +60,11 @@ flowchart TB
 
     subgraph Vercel
         Static[frontend/build]
-        API[Serverless Functions api/*]
+        API[api/index.ts — single function]
     end
 
     subgraph backend_lib[backend/ — shared code]
+        Handlers[handlers/]
         Lib[lib/ + models/]
     end
 
@@ -74,10 +76,12 @@ flowchart TB
 
     SPA -->|GET /api/projects| API
     Admin -->|JWT-protected CRUD| API
-    API --> Lib
+    API --> Handlers
+    Handlers --> Lib
     Lib --> MongoDB
+
     Lib --> S3
-    API --> Brevo
+    Handlers --> Brevo
 
     Vercel --> Static
     Vercel --> API
@@ -87,18 +91,18 @@ flowchart TB
 
 | Environment | How `/api/*` works |
 |-------------|-------------------|
-| **Local dev** | CRA `setupProxy.js` forwards `/api/*` → `http://localhost:3001` (backend dev server loads handlers from `api/`) |
-| **Production** | Same origin — Vercel serves `api/*.ts` as serverless functions |
+| **Local dev** | CRA `setupProxy.js` forwards `/api/*` → `http://localhost:3001` (`dev-server.ts` loads `api/index.ts`) |
+| **Production** | `vercel.json` rewrites `/api/(.*)` → `/api/index?path=$1` — one serverless function |
 
 No `REACT_APP_API_URL` is needed in production.
 
 ## Serverless design
 
-Each file under `api/` exports a default `handler(req, res)` compatible with `@vercel/node`:
+`api/index.ts` exports a default `handler(req, res)` compatible with `@vercel/node`. It reads the path from `req.query.path` (set by the Vercel rewrite) and dispatches to `backend/handlers/*`:
 
-- **Cold-start friendly** — only one route's code loads per request
+- **Hobby-plan friendly** — only **1** serverless function for the entire API
 - **No long-running server** on Vercel
-- **Clear split** — public routes vs JWT-protected admin routes
+- **Clear split** — router in `api/`, business logic in `backend/handlers/`
 
 Local development uses `backend/scripts/dev-server.ts` instead of Vercel CLI (avoids recursive `vercel dev` issues).
 

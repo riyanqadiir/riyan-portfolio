@@ -11,9 +11,9 @@
 ## Repo layout at a glance
 
 ```
-frontend/   React UI
-api/        Vercel serverless handlers (deployed)
-backend/    Shared lib, models, local dev server
-docs/       This folder
-vercel.json Deploy configuration
+frontend/       React UI
+api/index.ts    Single API router (1 Vercel function)
+backend/        handlers/, lib/, models/, local dev server
+docs/           This folder
+vercel.json     Deploy configuration + API rewrite
 ```

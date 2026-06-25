@@ -16,9 +16,10 @@ React frontend + Vercel serverless API with a full CMS admin dashboard, MongoDB,
 ```
 react-portfolio-template/
 ├── frontend/          React SPA (portfolio + /admin CMS)
-├── api/               Vercel serverless route handlers (deployed)
-├── backend/           Shared server logic, models, local dev (not deployed alone)
-│   ├── lib/           Auth, DB, S3, validators, business logic
+├── api/               Single Vercel serverless entry (api/index.ts)
+├── backend/           Shared server logic, models, handlers, local dev
+│   ├── handlers/      Route logic (projects, resume, contact, etc.)
+│   ├── lib/           Auth, DB, S3, validators
 │   ├── models/        Mongoose schemas
 │   ├── scripts/       Local dev server (port 3001)
 │   └── .env           Local secrets (gitignored)
@@ -30,8 +31,8 @@ react-portfolio-template/
 | Folder | Role |
 |--------|------|
 | `frontend/` | UI only — calls `/api/*` on the same origin |
-| `api/` | Thin HTTP handlers — one file per route (Vercel requirement) |
-| `backend/` | Shared library + local dev tooling — imported by `api/` handlers |
+| `api/` | Single router (`index.ts`) — all `/api/*` requests on Vercel |
+| `backend/` | Handlers, lib, models, and local dev server — imported by `api/` |
 
 ## Quick start
 

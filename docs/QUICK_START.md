@@ -7,7 +7,7 @@ A portfolio monorepo with three main parts:
 | Folder | What it is | Runs on |
 |--------|------------|---------|
 | `frontend/` | React portfolio + `/admin` CMS | `localhost:3000` |
-| `api/` | HTTP route handlers (deployed to Vercel) | same origin `/api/*` |
+| `api/` | Single API router (`index.ts`) — deployed as one Vercel function | same origin `/api/*` |
 | `backend/` | Shared logic, models, local dev server | `localhost:3001` (dev only) |
 
 Vercel deploys **frontend + api** from the repo root using `vercel.json`.
@@ -62,7 +62,7 @@ cd backend
 npm run dev
 ```
 
-Runs on port **3001**. Loads handlers from root `api/`.
+Runs on port **3001**. Uses `api/index.ts` (same router as production).
 
 **Terminal 2 — Frontend:**
 
@@ -96,27 +96,23 @@ frontend/
   public/               Favicons, SEO, legacy project images
   package.json
 
-api/                    Route handlers (one file = one endpoint) — DEPLOYED
-  projects/
-  expertise/
-  timeline/
-  resume/
-  profile-photo/
-  auth/login.ts
-  contact.ts
-  health.ts
+api/                    Single API router — DEPLOYED as 1 Vercel function
+  index.ts              Routes all /api/* (rewritten via vercel.json)
 
 backend/                Shared code — NOT deployed alone
+  handlers/             health, projects, expertise, timeline, resume, etc.
   lib/                  auth, db, s3, validators
   models/               Mongoose schemas
-  scripts/dev-server.ts Local API server
+  scripts/dev-server.ts Local API server (mirrors production routing)
   .env                  Secrets (gitignored)
   package.json
 
 package.json            Root deps for Vercel API bundling
-vercel.json             Deploy config
+vercel.json             Build config + /api/* → /api/index rewrite
 docs/                   Documentation
 ```
+
+All `/api/*` URLs are handled by a single router (`api/index.ts` on Vercel, same file in local dev). Endpoint paths below are unchanged — only the internal routing is unified.
 
 ---
 

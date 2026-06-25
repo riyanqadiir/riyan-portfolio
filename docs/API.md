@@ -2,6 +2,8 @@
 
 Base URL: `/api` (same origin in production; proxied to `:3001` in local dev)
 
+All requests hit one router (`api/index.ts` → `backend/handlers/*`). The endpoint paths below are what the frontend calls — implementation lives in `backend/handlers/`.
+
 All JSON responses use `Content-Type: application/json` unless noted.
 
 **Auth header for protected routes:**

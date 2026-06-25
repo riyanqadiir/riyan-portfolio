@@ -50,7 +50,7 @@ cd backend
 npm run dev
 ```
 
-Uses `scripts/dev-server.ts` — loads handlers from root `api/` and shared code from `backend/lib/`.
+Uses `scripts/dev-server.ts` — loads `api/index.ts` and shared code from `backend/`.
 
 **Terminal 2 — Frontend (port 3000):**
 
@@ -87,18 +87,19 @@ Uses root `vercel.json` — closer to production, but slower than the two-termin
 ## Project structure reminder
 
 ```
-api/          ← route handlers (same files Vercel deploys)
-backend/      ← lib/, models/, dev server, .env
+api/index.ts  ← single router (same file Vercel deploys)
+backend/      ← handlers/, lib/, models/, dev server, .env
 frontend/     ← React app
 ```
 
 When editing API behavior:
 
-- Change request/response logic in `api/<route>.ts`
-- Change shared business logic in `backend/lib/`
+- Add or change route logic in `backend/handlers/`
+- Wire new routes in `api/index.ts`
+- Change shared utilities in `backend/lib/`
 - Change schemas in `backend/models/`
 
-Restart `npm run dev` in `backend/` after adding new routes to `scripts/dev-server.ts`.
+Restart `npm run dev` in `backend/` after API changes.
 
 ## Troubleshooting
 
