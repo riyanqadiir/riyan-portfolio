@@ -1,7 +1,7 @@
 import type { Model } from 'mongoose';
 
 /** Returns the next display order (append to end of list). */
-export async function getNextOrder(model: Model<unknown>): Promise<number> {
+export async function getNextOrder(model: Model<any>): Promise<number> {
   const [result] = await model.aggregate([
     { $group: { _id: null, maxOrder: { $max: '$order' } } },
   ]);
