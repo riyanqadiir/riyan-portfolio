@@ -1,17 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import multer from 'multer';
-import { connectDB, isDbConnected } from '../../backend/lib/db';
-import { verifyAuth } from '../../backend/lib/auth';
-import { uploadResumeToS3, getSignedFileUrl } from '../../backend/lib/s3';
-import Resume from '../../backend/models/Resume';
-
-/**
- * POST /api/resume/upload
- *
- * Protected (JWT). Upload or replace the portfolio resume (PDF only, max 10 MB).
- *
- * Response 200: { message, fileName, previewUrl, downloadUrl, updatedAt }
- */
+import { connectDB, isDbConnected } from '../lib/db';
+import { verifyAuth } from '../lib/auth';
+import { uploadResumeToS3, getSignedFileUrl } from '../lib/s3';
+import Resume from '../models/Resume';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -34,9 +26,42 @@ function runMulter(req: VercelRequest, res: VercelResponse): Promise<void> {
   });
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') return res.status(200).end();
+export async function handleResumeGet(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
 
+  try {
+    await connectDB();
+    if (!isDbConnected()) {
+      return res.status(200).json({ hasResume: false });
+    }
+
+    const resume = await Resume.findOne({ slug: 'main' }).lean();
+    if (!resume) {
+      return res.status(200).json({ hasResume: false });
+    }
+
+    const fileName = resume.fileName || 'Resume.pdf';
+    const [previewUrl, downloadUrl] = await Promise.all([
+      getSignedFileUrl(resume.s3Key, undefined, { fileName, inline: true }),
+      getSignedFileUrl(resume.s3Key, undefined, { fileName, inline: false }),
+    ]);
+
+    return res.status(200).json({
+      hasResume: true,
+      fileName,
+      previewUrl,
+      downloadUrl,
+      updatedAt: resume.updatedAt,
+    });
+  } catch (error) {
+    console.error('[resume] GET error:', error);
+    return res.status(500).json({ message: 'Failed to load resume' });
+  }
+}
+
+export async function handleResumeUpload(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -90,11 +115,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       updatedAt: resume.updatedAt,
     });
   } catch (error) {
-    console.error('[resume/upload] error:', error);
+    console.error('[resume] upload error:', error);
     return res.status(500).json({ message: 'Resume upload failed' });
   }
 }
-
-export const config = {
-  api: { bodyParser: false },
-};

@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectDB, isDbConnected } from '../../backend/lib/db';
-import { verifyAuth } from '../../backend/lib/auth';
-import { ExpertiseSchema, formatZodErrors } from '../../backend/lib/validators';
-import Expertise from '../../backend/models/Expertise';
+import { connectDB, isDbConnected } from '../lib/db';
+import { verifyAuth } from '../lib/auth';
+import { ExpertiseSchema, formatZodErrors } from '../lib/validators';
+import Expertise from '../models/Expertise';
 
 export const SEED_EXPERTISE = [
   {
@@ -34,9 +34,7 @@ export const SEED_EXPERTISE = [
   },
 ];
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') return res.status(200).end();
-
+export async function handleExpertiseRoot(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
     try {
       await connectDB();
@@ -48,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       return res.status(200).json(items);
     } catch (error) {
-      console.error('[expertise/index] GET error:', error);
+      console.error('[expertise] GET error:', error);
       return res.status(200).json(SEED_EXPERTISE);
     }
   }
@@ -85,8 +83,58 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
       return res.status(201).json(item);
     } catch (error) {
-      console.error('[expertise/index] POST error:', error);
+      console.error('[expertise] POST error:', error);
       return res.status(500).json({ message: 'Failed to create expertise item' });
+    }
+  }
+
+  return res.status(405).json({ message: 'Method not allowed' });
+}
+
+export async function handleExpertiseById(req: VercelRequest, res: VercelResponse, id: string) {
+  const admin = verifyAuth(req, res);
+  if (!admin) return;
+
+  if (req.method === 'PUT') {
+    const parsed = ExpertiseSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ errors: formatZodErrors(parsed.error) });
+    }
+
+    try {
+      await connectDB();
+      if (!isDbConnected()) {
+        return res.status(503).json({ message: 'Database not connected.' });
+      }
+
+      const { title, description, icon, chipsLabel, chips, order } = parsed.data;
+      const updated = await Expertise.findByIdAndUpdate(
+        id,
+        { title, description, icon, chipsLabel, chips, ...(order !== undefined && { order }) },
+        { new: true, runValidators: true }
+      );
+
+      if (!updated) return res.status(404).json({ message: 'Expertise item not found' });
+      return res.status(200).json(updated);
+    } catch (error) {
+      console.error('[expertise] PUT error:', error);
+      return res.status(500).json({ message: 'Failed to update expertise item' });
+    }
+  }
+
+  if (req.method === 'DELETE') {
+    try {
+      await connectDB();
+      if (!isDbConnected()) {
+        return res.status(503).json({ message: 'Database not connected.' });
+      }
+
+      const deleted = await Expertise.findByIdAndDelete(id);
+      if (!deleted) return res.status(404).json({ message: 'Expertise item not found' });
+      return res.status(200).json({ message: 'Expertise item deleted', id });
+    } catch (error) {
+      console.error('[expertise] DELETE error:', error);
+      return res.status(500).json({ message: 'Failed to delete expertise item' });
     }
   }
 

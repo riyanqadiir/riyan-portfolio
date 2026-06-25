@@ -75,22 +75,36 @@ async function readJsonBody(req: http.IncomingMessage): Promise<unknown> {
 const routes: Array<{
   pattern: RegExp;
   load: () => Promise<{ default: Handler }>;
+  slugFromMatch?: (match: RegExpMatchArray) => string[] | undefined;
 }> = [
   { pattern: /^\/api\/health$/, load: () => import('../../api/health') },
   { pattern: /^\/api\/auth\/login$/, load: () => import('../../api/auth/login') },
-  { pattern: /^\/api\/projects\/upload$/, load: () => import('../../api/projects/upload') },
-  { pattern: /^\/api\/projects$/, load: () => import('../../api/projects/index') },
-  { pattern: /^\/api\/projects\/([^/]+)$/, load: () => import('../../api/projects/[id]') },
-  { pattern: /^\/api\/expertise$/, load: () => import('../../api/expertise/index') },
-  { pattern: /^\/api\/expertise\/([^/]+)$/, load: () => import('../../api/expertise/[id]') },
-  { pattern: /^\/api\/resume\/upload$/, load: () => import('../../api/resume/upload') },
-  { pattern: /^\/api\/resume$/, load: () => import('../../api/resume/index') },
-  { pattern: /^\/api\/profile-photo\/upload$/, load: () => import('../../api/profile-photo/upload') },
-  { pattern: /^\/api\/profile-photo$/, load: () => import('../../api/profile-photo/index') },
-  { pattern: /^\/api\/timeline\/normalize$/, load: () => import('../../api/timeline/normalize') },
-  { pattern: /^\/api\/timeline$/, load: () => import('../../api/timeline/index') },
-  { pattern: /^\/api\/timeline\/([^/]+)$/, load: () => import('../../api/timeline/[id]') },
   { pattern: /^\/api\/contact$/, load: () => import('../../api/contact') },
+  {
+    pattern: /^\/api\/projects(?:\/(.*))?$/,
+    load: () => import('../../api/projects/[[...slug]]'),
+    slugFromMatch: (m) => (m[1] ? m[1].split('/') : []),
+  },
+  {
+    pattern: /^\/api\/expertise(?:\/(.*))?$/,
+    load: () => import('../../api/expertise/[[...slug]]'),
+    slugFromMatch: (m) => (m[1] ? m[1].split('/') : []),
+  },
+  {
+    pattern: /^\/api\/timeline(?:\/(.*))?$/,
+    load: () => import('../../api/timeline/[[...slug]]'),
+    slugFromMatch: (m) => (m[1] ? m[1].split('/') : []),
+  },
+  {
+    pattern: /^\/api\/resume(?:\/(.*))?$/,
+    load: () => import('../../api/resume/[[...slug]]'),
+    slugFromMatch: (m) => (m[1] ? m[1].split('/') : []),
+  },
+  {
+    pattern: /^\/api\/profile-photo(?:\/(.*))?$/,
+    load: () => import('../../api/profile-photo/[[...slug]]'),
+    slugFromMatch: (m) => (m[1] ? m[1].split('/') : []),
+  },
 ];
 
 const server = http.createServer(async (req, res) => {
@@ -115,8 +129,11 @@ const server = http.createServer(async (req, res) => {
       const vercelReq = req as VercelRequest;
       vercelReq.query = {};
 
-      if (match[1]) {
-        vercelReq.query.id = match[1];
+      if (route.slugFromMatch && match) {
+        const slug = route.slugFromMatch(match);
+        if (slug && slug.length > 0) {
+          vercelReq.query.slug = slug;
+        }
       }
 
       const isMultipartUpload =

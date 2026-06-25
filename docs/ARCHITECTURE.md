@@ -12,17 +12,18 @@ react-portfolio-template/
 │   ├── package.json
 │   └── tsconfig.json
 │
-├── api/                      # Vercel serverless route handlers (DEPLOYED)
-│   ├── projects/             # Project CRUD + image upload
-│   ├── expertise/            # Skills CMS
-│   ├── timeline/             # Career history CMS
-│   ├── resume/               # PDF resume (GET + upload)
-│   ├── profile-photo/        # Profile photo (GET + upload)
+├── api/                      # Vercel serverless route handlers (8 functions — Hobby limit)
+│   ├── projects/[[...slug]].ts
+│   ├── expertise/[[...slug]].ts
+│   ├── timeline/[[...slug]].ts
+│   ├── resume/[[...slug]].ts
+│   ├── profile-photo/[[...slug]].ts
 │   ├── auth/login.ts
 │   ├── contact.ts
 │   └── health.ts
 │
 ├── backend/                  # Shared server code + local dev (NOT deployed alone)
+│   ├── handlers/             # Route logic (imported by api/ catch-all routers)
 │   ├── lib/                  # auth, db, s3, validators, timeline-order, projects
 │   ├── models/               # Mongoose schemas (Project, Expertise, Timeline, Resume, ProfilePhoto)
 │   ├── scripts/dev-server.ts # Local API on port 3001

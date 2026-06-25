@@ -9,6 +9,21 @@ One Vercel project deploys everything:
 
 Root `vercel.json` controls install, build, output, rewrites, and function settings.
 
+Vercel Hobby allows **12 serverless functions** per deployment. This repo uses **8** by grouping related routes into catch-all handlers:
+
+| Function | Routes |
+|----------|--------|
+| `api/health.ts` | `GET /api/health` |
+| `api/contact.ts` | `POST /api/contact` |
+| `api/auth/login.ts` | `POST /api/auth/login` |
+| `api/projects/[[...slug]].ts` | projects CRUD + upload |
+| `api/expertise/[[...slug]].ts` | expertise CRUD |
+| `api/timeline/[[...slug]].ts` | timeline CRUD + normalize |
+| `api/resume/[[...slug]].ts` | resume GET + upload |
+| `api/profile-photo/[[...slug]].ts` | profile photo GET + upload |
+
+Shared business logic lives in `backend/handlers/` and `backend/lib/`.
+
 ## Vercel project settings
 
 When importing or reviewing settings:

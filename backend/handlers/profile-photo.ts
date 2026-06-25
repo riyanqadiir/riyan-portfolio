@@ -1,17 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import multer from 'multer';
-import { connectDB, isDbConnected } from '../../backend/lib/db';
-import { verifyAuth } from '../../backend/lib/auth';
-import { uploadProfilePhotoToS3, getSignedFileUrl, deleteFromS3 } from '../../backend/lib/s3';
-import ProfilePhoto from '../../backend/models/ProfilePhoto';
-
-/**
- * POST /api/profile-photo/upload
- *
- * Protected (JWT). Upload or replace the portfolio profile photo (images only, max 5 MB).
- *
- * Response 200: { message, fileName, imageUrl, previewUrl, downloadUrl, updatedAt }
- */
+import { connectDB, isDbConnected } from '../lib/db';
+import { verifyAuth } from '../lib/auth';
+import { uploadProfilePhotoToS3, getSignedFileUrl, deleteFromS3 } from '../lib/s3';
+import ProfilePhoto from '../models/ProfilePhoto';
 
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
@@ -36,9 +28,44 @@ function runMulter(req: VercelRequest, res: VercelResponse): Promise<void> {
   });
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') return res.status(200).end();
+export async function handleProfilePhotoGet(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
 
+  try {
+    await connectDB();
+    if (!isDbConnected()) {
+      return res.status(200).json({ hasProfilePhoto: false });
+    }
+
+    const photo = await ProfilePhoto.findOne({ slug: 'main' }).lean();
+    if (!photo) {
+      return res.status(200).json({ hasProfilePhoto: false });
+    }
+
+    const fileName = photo.fileName || 'profile-photo.jpg';
+    const [imageUrl, previewUrl, downloadUrl] = await Promise.all([
+      getSignedFileUrl(photo.s3Key, undefined, { fileName, inline: true }),
+      getSignedFileUrl(photo.s3Key, undefined, { fileName, inline: true }),
+      getSignedFileUrl(photo.s3Key, undefined, { fileName, inline: false }),
+    ]);
+
+    return res.status(200).json({
+      hasProfilePhoto: true,
+      fileName,
+      imageUrl,
+      previewUrl,
+      downloadUrl,
+      updatedAt: photo.updatedAt,
+    });
+  } catch (error) {
+    console.error('[profile-photo] GET error:', error);
+    return res.status(500).json({ message: 'Failed to load profile photo' });
+  }
+}
+
+export async function handleProfilePhotoUpload(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -79,7 +106,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         await deleteFromS3(existing.s3Key);
       } catch {
-        // Non-fatal if old object cleanup fails
+        // Non-fatal
       }
     }
 
@@ -104,11 +131,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       updatedAt: photo.updatedAt,
     });
   } catch (error) {
-    console.error('[profile-photo/upload] error:', error);
+    console.error('[profile-photo] upload error:', error);
     return res.status(500).json({ message: 'Profile photo upload failed' });
   }
 }
-
-export const config = {
-  api: { bodyParser: false },
-};

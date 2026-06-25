@@ -17,6 +17,7 @@
   },
   "include": [
     "../api/**/*",
+    "handlers/**/*",
     "lib/**/*",
     "models/**/*",
     "scripts/**/*"
