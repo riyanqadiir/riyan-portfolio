@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import multer from 'multer';
-import { connectDB, isDbConnected } from '../../lib/db';
-import { verifyAuth } from '../../lib/auth';
-import { uploadProfilePhotoToS3, getSignedFileUrl, deleteFromS3 } from '../../lib/s3';
-import ProfilePhoto from '../../models/ProfilePhoto';
+import { connectDB, isDbConnected } from '../../backend/lib/db';
+import { verifyAuth } from '../../backend/lib/auth';
+import { uploadProfilePhotoToS3, getSignedFileUrl, deleteFromS3 } from '../../backend/lib/s3';
+import ProfilePhoto from '../../backend/models/ProfilePhoto';
 
 /**
  * POST /api/profile-photo/upload

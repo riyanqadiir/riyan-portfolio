@@ -1,13 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectDB, isDbConnected } from '../../lib/db';
-import { verifyAuth } from '../../lib/auth';
-import { TimelineSchema, formatZodErrors } from '../../lib/validators';
-import Timeline from '../../models/Timeline';
+import { connectDB, isDbConnected } from '../../backend/lib/db';
+import { verifyAuth } from '../../backend/lib/auth';
+import { TimelineSchema, formatZodErrors } from '../../backend/lib/validators';
+import Timeline from '../../backend/models/Timeline';
 import {
   moveItem,
   setItemOrder,
   compactAfterDelete,
-} from '../../lib/timeline-order';
+} from '../../backend/lib/timeline-order';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') return res.status(200).end();

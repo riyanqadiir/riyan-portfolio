@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectDB, isDbConnected } from '../../lib/db';
-import { verifyAuth } from '../../lib/auth';
-import { TimelineSchema, formatZodErrors } from '../../lib/validators';
-import Timeline from '../../models/Timeline';
-import { pushToTop } from '../../lib/timeline-order';
+import { connectDB, isDbConnected } from '../../backend/lib/db';
+import { verifyAuth } from '../../backend/lib/auth';
+import { TimelineSchema, formatZodErrors } from '../../backend/lib/validators';
+import Timeline from '../../backend/models/Timeline';
+import { pushToTop } from '../../backend/lib/timeline-order';
 
 /** order 0 = top (newest). Higher order = further down the page. */
 export const SEED_TIMELINE = [

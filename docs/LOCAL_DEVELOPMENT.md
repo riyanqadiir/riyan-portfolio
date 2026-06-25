@@ -2,22 +2,21 @@
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 20+ (matches `"engines": { "node": "20.x" }` in root `package.json`)
 - npm
-- [Vercel CLI](https://vercel.com/docs/cli) (`npm i -g vercel` or use the root devDependency)
 - MongoDB Atlas cluster (or local MongoDB)
-- AWS S3 bucket with `s3:PutObject` permission for your IAM user
+- AWS S3 bucket with `PutObject` / `GetObject` for `projects/*`, `resumes/*`, `profiles/*`
+- Brevo account for contact form (optional until you test contact)
 
-## 1. Install Dependencies
-
-Install each app separately:
+## 1. Install dependencies
 
 ```bash
+npm install                    # root — API bundling deps
 cd frontend && npm install
 cd ../backend && npm install
 ```
 
-## 2. Configure Environment
+## 2. Configure environment
 
 Copy the example env file into **backend/** (not the repo root):
 
@@ -29,15 +28,18 @@ cp backend/.env.example backend/.env
 
 | Variable | Purpose |
 |----------|---------|
-| `MONGO_URI` | MongoDB connection — use `/portfolio` as the database name |
+| `MONGO_URI` | MongoDB — use `/portfolio` as the database name |
 | `JWT_SECRET` | Secret for signing admin JWTs |
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Admin login credentials |
-| `AWS_*` | S3 upload credentials |
-| `BREVO_*` | Contact form email delivery |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Admin login |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | S3 uploads |
+| `AWS_REGION` / `AWS_S3_BUCKET` | S3 bucket config |
+| `BREVO_API_KEY` / `BREVO_SENDER_EMAIL` | Contact form email |
 
 > Never commit `backend/.env`. It is gitignored.
 
-## 3. Start Development Servers
+**No frontend `.env` is required.** Optional: `REACT_APP_API_URL` in `frontend/.env` to override the dev proxy target (default `http://localhost:3001`).
+
+## 3. Start development servers
 
 ### Two terminals (recommended)
 
@@ -45,11 +47,10 @@ cp backend/.env.example backend/.env
 
 ```bash
 cd backend
-npm install   # first time only
 npm run dev
 ```
 
-Uses `scripts/dev-server.ts` — a lightweight local server on port 3001. (Vercel CLI cannot be used as `npm run dev` because it recursively invokes itself.)
+Uses `scripts/dev-server.ts` — loads handlers from root `api/` and shared code from `backend/lib/`.
 
 **Terminal 2 — Frontend (port 3000):**
 
@@ -62,45 +63,74 @@ The frontend proxies `/api/*` to `http://localhost:3001` via `frontend/src/setup
 
 ### Alternative — Vercel dev (full-stack simulation)
 
-From the repo root (requires [Vercel CLI](https://vercel.com/docs/cli) installed globally):
+From the repo root (requires [Vercel CLI](https://vercel.com/docs/cli)):
 
 ```bash
 vercel dev
 ```
 
-Uses root `vercel.json` to serve both the CRA dev server and API routes together, closer to production behavior.
+Uses root `vercel.json` — closer to production, but slower than the two-terminal setup.
 
-## 4. Verify Everything Works
+## 4. Verify everything works
 
 | Check | URL / Action |
 |-------|----------------|
 | Portfolio loads | http://localhost:3000 |
 | API health | http://localhost:3001/api/health |
-| Projects API | http://localhost:3000/api/projects |
+| Projects via proxy | http://localhost:3000/api/projects |
 | Admin login | http://localhost:3000/admin |
-| Image upload | Admin → Add Project → Upload Image |
+| Project image upload | Admin → Projects → Upload Image |
+| Resume upload | Admin → Resume → Upload PDF |
+| Profile photo | Admin → Profile Photo → Upload image |
+| Contact form | Homepage → Contact section |
+
+## Project structure reminder
+
+```
+api/          ← route handlers (same files Vercel deploys)
+backend/      ← lib/, models/, dev server, .env
+frontend/     ← React app
+```
+
+When editing API behavior:
+
+- Change request/response logic in `api/<route>.ts`
+- Change shared business logic in `backend/lib/`
+- Change schemas in `backend/models/`
+
+Restart `npm run dev` in `backend/` after adding new routes to `scripts/dev-server.ts`.
 
 ## Troubleshooting
 
 ### API calls return 404 in the browser
 
-- Ensure the backend is running on port 3001
-- Check `frontend/src/setupProxy.js` target URL
-- Restart the frontend after changing proxy config
+- Ensure backend is running on port 3001
+- Kill stale process: `lsof -ti :3001 | xargs kill`
+- Restart frontend after changing `setupProxy.js`
+
+### `Invalid JSON body` on file upload (local dev)
+
+The dev server must skip JSON parsing for multipart routes (`/api/projects/upload`, `/api/resume/upload`, `/api/profile-photo/upload`). This is configured in `backend/scripts/dev-server.ts`.
 
 ### MongoDB connection fails
 
 - Confirm `MONGO_URI` uses database name `portfolio`
 - Whitelist your IP in MongoDB Atlas → Network Access
-- Check username/password in the connection string
 
-### S3 upload fails
+### S3 upload fails (`AccessDenied`)
 
-- Verify IAM user has `s3:PutObject` on the bucket
-- Confirm bucket name and region match env vars
-- Bucket must allow public read (bucket policy) OR use CloudFront for private buckets
+- Bucket is **private** — the app uses presigned URLs (this is correct)
+- Verify IAM policy covers `projects/*`, `resumes/*`, `profiles/*`
+- Confirm `AWS_S3_BUCKET` matches the bucket your IAM user can access
 
 ### JWT / 401 on admin actions
 
-- Log out and log back in to refresh the token
-- Ensure `JWT_SECRET` is the same between restarts
+- Log out and log back in
+- Ensure `JWT_SECRET` is unchanged between restarts
+
+### Port 3001 already in use
+
+```bash
+lsof -ti :3001 | xargs kill
+cd backend && npm run dev
+```

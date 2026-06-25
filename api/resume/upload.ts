@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import multer from 'multer';
-import { connectDB, isDbConnected } from '../../lib/db';
-import { verifyAuth } from '../../lib/auth';
-import { uploadResumeToS3, getSignedFileUrl } from '../../lib/s3';
-import Resume from '../../models/Resume';
+import { connectDB, isDbConnected } from '../../backend/lib/db';
+import { verifyAuth } from '../../backend/lib/auth';
+import { uploadResumeToS3, getSignedFileUrl } from '../../backend/lib/s3';
+import Resume from '../../backend/models/Resume';
 
 /**
  * POST /api/resume/upload

@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectDB, isDbConnected } from '../../lib/db';
-import { verifyAuth } from '../../lib/auth';
-import { ExpertiseSchema, formatZodErrors } from '../../lib/validators';
-import Expertise from '../../models/Expertise';
+import { connectDB, isDbConnected } from '../../backend/lib/db';
+import { verifyAuth } from '../../backend/lib/auth';
+import { ExpertiseSchema, formatZodErrors } from '../../backend/lib/validators';
+import Expertise from '../../backend/models/Expertise';
 
 export const SEED_EXPERTISE = [
   {

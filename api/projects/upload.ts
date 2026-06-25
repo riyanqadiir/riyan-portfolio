@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import multer from 'multer';
-import { verifyAuth } from '../../lib/auth';
-import { uploadToS3, getSignedImageUrl } from '../../lib/s3';
+import { verifyAuth } from '../../backend/lib/auth';
+import { uploadToS3, getSignedImageUrl } from '../../backend/lib/s3';
 
 /**
  * POST /api/projects/upload

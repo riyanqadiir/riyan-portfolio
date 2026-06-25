@@ -2,8 +2,18 @@
 
 | Guide | Description |
 |-------|-------------|
-| [QUICK_START.md](./QUICK_START.md) | **Start here** — 5-minute overview and commands |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Repo layout, data flow, auth, S3, and design decisions |
-| [LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md) | Install, env setup, and running locally |
-| [DEPLOYMENT.md](./DEPLOYMENT.md) | Deploying to Vercel with environment variables |
-| [API.md](./API.md) | REST API endpoint reference |
+| [QUICK_START.md](./QUICK_START.md) | **Start here** — setup, commands, folder layout |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | `frontend/` + `api/` + `backend/` — how they connect |
+| [LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md) | Env vars, dev servers, troubleshooting |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | Vercel settings, env vars, deploy troubleshooting |
+| [API.md](./API.md) | Full REST API reference (projects, CMS, resume, photo, contact) |
+
+## Repo layout at a glance
+
+```
+frontend/   React UI
+api/        Vercel serverless handlers (deployed)
+backend/    Shared lib, models, local dev server
+docs/       This folder
+vercel.json Deploy configuration
+```

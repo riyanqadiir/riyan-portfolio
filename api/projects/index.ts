@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectDB, isDbConnected } from '../../lib/db';
-import { verifyAuth } from '../../lib/auth';
-import { ProjectSchema, formatZodErrors } from '../../lib/validators';
-import Project from '../../models/Project';
-import { enrichProjects } from '../../lib/projects';
-import { normalizeImageForStorage } from '../../lib/s3';
+import { connectDB, isDbConnected } from '../../backend/lib/db';
+import { verifyAuth } from '../../backend/lib/auth';
+import { ProjectSchema, formatZodErrors } from '../../backend/lib/validators';
+import Project from '../../backend/models/Project';
+import { enrichProjects } from '../../backend/lib/projects';
+import { normalizeImageForStorage } from '../../backend/lib/s3';
 
 /**
  * Seed data shown when the database is empty or unreachable.

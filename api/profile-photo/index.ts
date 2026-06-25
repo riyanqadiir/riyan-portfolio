@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectDB, isDbConnected } from '../../lib/db';
-import { getSignedFileUrl } from '../../lib/s3';
-import ProfilePhoto from '../../models/ProfilePhoto';
+import { connectDB, isDbConnected } from '../../backend/lib/db';
+import { getSignedFileUrl } from '../../backend/lib/s3';
+import ProfilePhoto from '../../backend/models/ProfilePhoto';
 
 /**
  * GET /api/profile-photo

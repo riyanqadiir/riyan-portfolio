@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { LoginSchema, formatZodErrors } from '../../lib/validators';
-import { signAdminToken } from '../../lib/auth';
+import { LoginSchema, formatZodErrors } from '../../backend/lib/validators';
+import { signAdminToken } from '../../backend/lib/auth';
 
 /**
  * POST /api/auth/login

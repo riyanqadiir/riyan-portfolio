@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectDB, isDbConnected } from '../../lib/db';
-import { verifyAuth } from '../../lib/auth';
-import Timeline from '../../models/Timeline';
-import { normalizeOrders } from '../../lib/timeline-order';
+import { connectDB, isDbConnected } from '../../backend/lib/db';
+import { verifyAuth } from '../../backend/lib/auth';
+import Timeline from '../../backend/models/Timeline';
+import { normalizeOrders } from '../../backend/lib/timeline-order';
 
 /**
  * POST /api/timeline/normalize

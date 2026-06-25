@@ -1,118 +1,167 @@
 # Portfolio Architecture
 
-This document explains how the portfolio monorepo is organized and how the pieces work together.
+This document explains how the monorepo is organized and how the pieces work together.
 
-## Repository Layout
+## Repository layout
 
 ```
 react-portfolio-template/
 ├── frontend/                 # React (CRA) single-page app
-│   ├── public/               # Static assets (images, favicons, SEO files)
+│   ├── public/               # Favicons, SEO, legacy project images (GitSol, TaskMaster)
 │   ├── src/                  # Components, styles, setupProxy.js
 │   ├── package.json
 │   └── tsconfig.json
 │
-├── backend/                  # Vercel serverless API (no Express server)
-│   ├── api/                  # One file = one serverless function / route
-│   ├── lib/                  # Shared server logic (auth, db, s3, validators)
-│   ├── models/               # Mongoose schemas
-│   ├── .env                  # Local secrets (gitignored — copy from .env.example)
-│   ├── package.json
+├── api/                      # Vercel serverless route handlers (DEPLOYED)
+│   ├── projects/             # Project CRUD + image upload
+│   ├── expertise/            # Skills CMS
+│   ├── timeline/             # Career history CMS
+│   ├── resume/               # PDF resume (GET + upload)
+│   ├── profile-photo/        # Profile photo (GET + upload)
+│   ├── auth/login.ts
+│   ├── contact.ts
+│   └── health.ts
+│
+├── backend/                  # Shared server code + local dev (NOT deployed alone)
+│   ├── lib/                  # auth, db, s3, validators, timeline-order, projects
+│   ├── models/               # Mongoose schemas (Project, Expertise, Timeline, Resume, ProfilePhoto)
+│   ├── scripts/dev-server.ts # Local API on port 3001
+│   ├── .env                  # Local secrets (gitignored)
+│   ├── .env.example
+│   ├── package.json          # Local dev deps (tsx, dotenv)
 │   └── tsconfig.json
 │
-├── docs/                     # Documentation
-├── vercel.json               # Vercel deploy config (must stay at root)
-├── tsconfig.json             # Optional editor project references
-├── README.md
-└── LICENSE
+├── docs/
+├── package.json              # Root deps — used by Vercel to bundle api/ functions
+├── vercel.json               # Build, rewrites, function config
+└── README.md
 ```
 
-**No root `package.json`.** Each app manages its own dependencies in `frontend/package.json` and `backend/package.json`. Vercel reads `vercel.json` at the root to build frontend and deploy API functions — that file is deploy config, not an npm package.
+### Why two folders: `api/` and `backend/`?
 
-## High-Level Flow
+Vercel **only deploys serverless functions from a root `/api` directory**. Business logic does not belong mixed into route files.
+
+| Folder | Purpose | Deployed? |
+|--------|---------|-----------|
+| `api/` | Thin handlers: parse request → call lib → return response | **Yes** |
+| `backend/` | Reusable logic, DB models, local dev server | **No** (imported by `api/`) |
+
+Example import in a handler:
+
+```typescript
+// api/projects/index.ts
+import { connectDB } from '../../backend/lib/db';
+import Project from '../../backend/models/Project';
+```
+
+## High-level flow
 
 ```mermaid
 flowchart TB
     subgraph Browser
         SPA[React SPA]
-        Admin["/admin Dashboard"]
+        Admin["/admin CMS"]
     end
 
     subgraph Vercel
-        Static[frontend/build static files]
-        API[Serverless Functions backend/api/*]
+        Static[frontend/build]
+        API[Serverless Functions api/*]
+    end
+
+    subgraph backend_lib[backend/ — shared code]
+        Lib[lib/ + models/]
     end
 
     subgraph External
         MongoDB[(MongoDB Atlas /portfolio)]
-        S3[(AWS S3 bucket)]
+        S3[(AWS S3 — private bucket)]
         Brevo[Brevo Email API]
     end
 
     SPA -->|GET /api/projects| API
-    Admin -->|POST /api/auth/login| API
-    Admin -->|CRUD /api/projects/*| API
-    Admin -->|POST /api/projects/upload| API
-    SPA -->|POST /api/contact| API
-
-    API --> MongoDB
-    API --> S3
+    Admin -->|JWT-protected CRUD| API
+    API --> Lib
+    Lib --> MongoDB
+    Lib --> S3
     API --> Brevo
 
     Vercel --> Static
     Vercel --> API
 ```
 
-## Why Serverless (Not Express)?
+## Local vs production routing
 
-The previous attempt used a single Express app (`api/index.ts`) at the repo root. That pattern does **not** map cleanly to Vercel's serverless model.
+| Environment | How `/api/*` works |
+|-------------|-------------------|
+| **Local dev** | CRA `setupProxy.js` forwards `/api/*` → `http://localhost:3001` (backend dev server loads handlers from `api/`) |
+| **Production** | Same origin — Vercel serves `api/*.ts` as serverless functions |
 
-The current backend uses **one TypeScript file per route** under `backend/api/`. Each file exports a default `handler(req, res)` function compatible with `@vercel/node`. Benefits:
+No `REACT_APP_API_URL` is needed in production.
 
-- **Cold-start friendly** — only the code for one route loads per request
-- **No long-running server** — scales automatically on Vercel
-- **Clear separation** — public routes vs JWT-protected admin routes
+## Serverless design
+
+Each file under `api/` exports a default `handler(req, res)` compatible with `@vercel/node`:
+
+- **Cold-start friendly** — only one route's code loads per request
+- **No long-running server** on Vercel
+- **Clear split** — public routes vs JWT-protected admin routes
+
+Local development uses `backend/scripts/dev-server.ts` instead of Vercel CLI (avoids recursive `vercel dev` issues).
 
 ## Authentication
 
 | Concern | Implementation |
 |---------|----------------|
-| Admin credentials | `ADMIN_USERNAME` + `ADMIN_PASSWORD` env vars (single admin) |
-| Login | `POST /api/auth/login` → returns JWT |
+| Admin credentials | `ADMIN_USERNAME` + `ADMIN_PASSWORD` env vars |
+| Login | `POST /api/auth/login` → JWT |
 | Protected routes | `Authorization: Bearer <token>` header |
 | Token storage | `localStorage.adminToken` in the browser |
 | Validation | Zod schemas in `backend/lib/validators.ts` |
 
-Protected endpoints: `POST /api/projects`, `PUT/DELETE /api/projects/:id`, `POST /api/projects/upload`.
+Protected: all `POST`/`PUT`/`DELETE`/`PATCH` CMS routes, file uploads.
 
-## Data Layer
+## Data layer
 
 - **Database:** MongoDB Atlas, database name `portfolio`
-- **Collection:** `projects` (Mongoose model `Project`)
-- **Connection caching:** `backend/lib/db.ts` caches Mongoose on `global` to reuse TCP connections across warm invocations
-- **Seed fallback:** If DB is unreachable, `GET /api/projects` returns hardcoded seed data so the site still renders
+- **Collections:** projects, expertise, timelines, resumes, profilephotos (Mongoose models)
+- **Connection caching:** `backend/lib/db.ts` reuses Mongoose on warm invocations
+- **Seed fallback:** `GET /api/projects` returns hardcoded seed data if DB is unreachable
 
-## Image Uploads
+## S3 storage (private bucket)
 
-1. Admin selects a file in the dashboard
-2. Frontend sends `multipart/form-data` to `POST /api/projects/upload`
-3. Multer (memory storage) parses the file in the serverless function
-4. `uploadToS3()` writes to `s3://<bucket>/projects/<timestamp>-<filename>`
-5. Public URL is returned and saved in the project record
+All uploads use presigned URLs — nothing is public-read on the bucket.
 
-## Contact Form Security
+| Content | S3 prefix | CMS tab |
+|---------|-----------|---------|
+| Project images | `projects/` | Projects |
+| Resume PDF | `resumes/portfolio-resume.pdf` | Resume |
+| Profile photo | `profiles/portfolio-photo.{jpg\|png\|webp}` | Profile Photo |
 
-The Brevo API key lives **only** in backend env vars. The React app calls `POST /api/contact`; it never sees the API key. This replaces the old pattern of `REACT_APP_BREVO_API_KEY` in the client bundle.
+Flow: upload → store S3 **key** in MongoDB → `GET` endpoints return presigned `imageUrl` / `previewUrl` / `downloadUrl`.
 
-## Frontend Routing
+## Admin CMS tabs
 
-| URL | Component | Purpose |
-|-----|-----------|---------|
-| `/` | Main portfolio sections | Public site |
-| `/admin` | `Admin.tsx` | Login + project CRUD |
+| Tab | API |
+|-----|-----|
+| Projects | `/api/projects`, `/api/projects/upload` |
+| Expertise | `/api/expertise` |
+| Career History | `/api/timeline`, `/api/timeline/normalize` |
+| Resume | `/api/resume`, `/api/resume/upload` |
+| Profile Photo | `/api/profile-photo`, `/api/profile-photo/upload` |
 
-React Router handles client-side routing. Vercel rewrites all non-`/api/*` paths to `index.html` for SPA support.
+## Contact form security
 
-## Validation Library
+The Brevo API key lives **only** in server env vars. The React app calls `POST /api/contact` — the key never ships to the browser.
 
-Request bodies are validated with **Zod** (not express-validator). Zod works without Express and fits the serverless handler pattern. Error responses use `{ field, message }[]` format.
+## Frontend routing
+
+| URL | Purpose |
+|-----|---------|
+| `/` | Public portfolio |
+| `/admin` | CMS login + content management |
+
+Vercel rewrites non-`/api/*` paths to `index.html` for SPA support.
+
+## Validation
+
+Request bodies use **Zod** (not express-validator). Error format: `{ errors: [{ field, message }] }`.

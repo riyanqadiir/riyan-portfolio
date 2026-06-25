@@ -76,21 +76,21 @@ const routes: Array<{
   pattern: RegExp;
   load: () => Promise<{ default: Handler }>;
 }> = [
-  { pattern: /^\/api\/health$/, load: () => import('../api/health') },
-  { pattern: /^\/api\/auth\/login$/, load: () => import('../api/auth/login') },
-  { pattern: /^\/api\/projects\/upload$/, load: () => import('../api/projects/upload') },
-  { pattern: /^\/api\/projects$/, load: () => import('../api/projects/index') },
-  { pattern: /^\/api\/projects\/([^/]+)$/, load: () => import('../api/projects/[id]') },
-  { pattern: /^\/api\/expertise$/, load: () => import('../api/expertise/index') },
-  { pattern: /^\/api\/expertise\/([^/]+)$/, load: () => import('../api/expertise/[id]') },
-  { pattern: /^\/api\/resume\/upload$/, load: () => import('../api/resume/upload') },
-  { pattern: /^\/api\/resume$/, load: () => import('../api/resume/index') },
-  { pattern: /^\/api\/profile-photo\/upload$/, load: () => import('../api/profile-photo/upload') },
-  { pattern: /^\/api\/profile-photo$/, load: () => import('../api/profile-photo/index') },
-  { pattern: /^\/api\/timeline\/normalize$/, load: () => import('../api/timeline/normalize') },
-  { pattern: /^\/api\/timeline$/, load: () => import('../api/timeline/index') },
-  { pattern: /^\/api\/timeline\/([^/]+)$/, load: () => import('../api/timeline/[id]') },
-  { pattern: /^\/api\/contact$/, load: () => import('../api/contact') },
+  { pattern: /^\/api\/health$/, load: () => import('../../api/health') },
+  { pattern: /^\/api\/auth\/login$/, load: () => import('../../api/auth/login') },
+  { pattern: /^\/api\/projects\/upload$/, load: () => import('../../api/projects/upload') },
+  { pattern: /^\/api\/projects$/, load: () => import('../../api/projects/index') },
+  { pattern: /^\/api\/projects\/([^/]+)$/, load: () => import('../../api/projects/[id]') },
+  { pattern: /^\/api\/expertise$/, load: () => import('../../api/expertise/index') },
+  { pattern: /^\/api\/expertise\/([^/]+)$/, load: () => import('../../api/expertise/[id]') },
+  { pattern: /^\/api\/resume\/upload$/, load: () => import('../../api/resume/upload') },
+  { pattern: /^\/api\/resume$/, load: () => import('../../api/resume/index') },
+  { pattern: /^\/api\/profile-photo\/upload$/, load: () => import('../../api/profile-photo/upload') },
+  { pattern: /^\/api\/profile-photo$/, load: () => import('../../api/profile-photo/index') },
+  { pattern: /^\/api\/timeline\/normalize$/, load: () => import('../../api/timeline/normalize') },
+  { pattern: /^\/api\/timeline$/, load: () => import('../../api/timeline/index') },
+  { pattern: /^\/api\/timeline\/([^/]+)$/, load: () => import('../../api/timeline/[id]') },
+  { pattern: /^\/api\/contact$/, load: () => import('../../api/contact') },
 ];
 
 const server = http.createServer(async (req, res) => {
