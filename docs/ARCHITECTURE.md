@@ -12,19 +12,12 @@ react-portfolio-template/
 │   ├── package.json
 │   └── tsconfig.json
 │
-├── api/                      # Vercel serverless route handlers (8 functions — Hobby limit)
-│   ├── projects/[[...slug]].ts
-│   ├── expertise/[[...slug]].ts
-│   ├── timeline/[[...slug]].ts
-│   ├── resume/[[...slug]].ts
-│   ├── profile-photo/[[...slug]].ts
-│   ├── auth/login.ts
-│   ├── contact.ts
-│   └── health.ts
+├── api/                      # Single Vercel serverless function (Hobby plan)
+│   └── index.ts              # Routes all /api/* via vercel.json rewrite
 │
 ├── backend/                  # Shared server code + local dev (NOT deployed alone)
-│   ├── handlers/             # Route logic (imported by api/ catch-all routers)
-│   ├── lib/                  # auth, db, s3, validators, timeline-order, projects
+│   ├── handlers/             # Route logic (health, projects, resume, etc.)
+│   ├── lib/                  # auth, db, s3, validators, request-body
 │   ├── models/               # Mongoose schemas (Project, Expertise, Timeline, Resume, ProfilePhoto)
 │   ├── scripts/dev-server.ts # Local API on port 3001
 │   ├── .env                  # Local secrets (gitignored)

@@ -9,20 +9,24 @@ One Vercel project deploys everything:
 
 Root `vercel.json` controls install, build, output, rewrites, and function settings.
 
-Vercel Hobby allows **12 serverless functions** per deployment. This repo uses **8** by grouping related routes into catch-all handlers:
+Vercel Hobby allows **12 serverless functions** per deployment. This repo uses **1** — a single `api/index.ts` router that handles every `/api/*` route via a `vercel.json` rewrite:
 
-| Function | Routes |
-|----------|--------|
-| `api/health.ts` | `GET /api/health` |
-| `api/contact.ts` | `POST /api/contact` |
-| `api/auth/login.ts` | `POST /api/auth/login` |
-| `api/projects/[[...slug]].ts` | projects CRUD + upload |
-| `api/expertise/[[...slug]].ts` | expertise CRUD |
-| `api/timeline/[[...slug]].ts` | timeline CRUD + normalize |
-| `api/resume/[[...slug]].ts` | resume GET + upload |
-| `api/profile-photo/[[...slug]].ts` | profile photo GET + upload |
+```json
+{ "source": "/api/(.*)", "destination": "/api/index?path=$1" }
+```
 
-Shared business logic lives in `backend/handlers/` and `backend/lib/`.
+Catch-all files like `[[...slug]].ts` only work in **Next.js**, not in plain Vercel serverless projects. Do not split routes into multiple `api/**/*.ts` files unless you upgrade to Pro.
+
+| Route | Handled by |
+|-------|------------|
+| `GET /api/health` | `api/index.ts` → `backend/handlers/health.ts` |
+| `POST /api/contact` | `api/index.ts` → `backend/handlers/contact.ts` |
+| `POST /api/auth/login` | `api/index.ts` → `backend/handlers/auth.ts` |
+| `/api/projects/*` | `api/index.ts` → `backend/handlers/projects.ts` |
+| `/api/expertise/*` | `api/index.ts` → `backend/handlers/expertise.ts` |
+| `/api/timeline/*` | `api/index.ts` → `backend/handlers/timeline.ts` |
+| `/api/resume/*` | `api/index.ts` → `backend/handlers/resume.ts` |
+| `/api/profile-photo/*` | `api/index.ts` → `backend/handlers/profile-photo.ts` |
 
 ## Vercel project settings
 

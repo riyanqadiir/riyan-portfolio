@@ -1,4 +1,5 @@
 import type { VercelRequest } from '@vercel/node';
+import { parse } from 'url';
 
 /** Parse JSON body when bodyParser is disabled (multipart catch-all routes). */
 export async function ensureJsonBody(req: VercelRequest): Promise<void> {
@@ -35,8 +36,31 @@ function readRawBody(req: VercelRequest): Promise<string> {
   });
 }
 
+/**
+ * Resolve API path segments from Vercel rewrite (?path=) or direct URL (/api/...).
+ * Non-Next.js Vercel projects require a single api/index.ts + rewrite — catch-all
+ * files like [[...slug]].ts are NOT supported outside Next.js.
+ */
+export function getApiPathSegments(req: VercelRequest): string[] {
+  const pathParam = req.query.path;
+  if (typeof pathParam === 'string' && pathParam.length > 0) {
+    return pathParam.split('/').filter(Boolean);
+  }
+  if (Array.isArray(pathParam)) {
+    return pathParam.flatMap((p) => p.split('/')).filter(Boolean);
+  }
+
+  const { pathname } = parse(req.url || '', true);
+  if (pathname?.startsWith('/api/')) {
+    return pathname.slice(5).split('/').filter(Boolean);
+  }
+  if (pathname === '/api/index' || pathname === '/api') {
+    return [];
+  }
+  return [];
+}
+
+/** @deprecated Use getApiPathSegments */
 export function getSlugSegments(req: VercelRequest): string[] {
-  const slug = req.query.slug;
-  if (!slug) return [];
-  return Array.isArray(slug) ? slug : [slug];
+  return getApiPathSegments(req);
 }

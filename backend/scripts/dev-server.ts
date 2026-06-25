@@ -72,41 +72,6 @@ async function readJsonBody(req: http.IncomingMessage): Promise<unknown> {
   });
 }
 
-const routes: Array<{
-  pattern: RegExp;
-  load: () => Promise<{ default: Handler }>;
-  slugFromMatch?: (match: RegExpMatchArray) => string[] | undefined;
-}> = [
-  { pattern: /^\/api\/health$/, load: () => import('../../api/health') },
-  { pattern: /^\/api\/auth\/login$/, load: () => import('../../api/auth/login') },
-  { pattern: /^\/api\/contact$/, load: () => import('../../api/contact') },
-  {
-    pattern: /^\/api\/projects(?:\/(.*))?$/,
-    load: () => import('../../api/projects/[[...slug]]'),
-    slugFromMatch: (m) => (m[1] ? m[1].split('/') : []),
-  },
-  {
-    pattern: /^\/api\/expertise(?:\/(.*))?$/,
-    load: () => import('../../api/expertise/[[...slug]]'),
-    slugFromMatch: (m) => (m[1] ? m[1].split('/') : []),
-  },
-  {
-    pattern: /^\/api\/timeline(?:\/(.*))?$/,
-    load: () => import('../../api/timeline/[[...slug]]'),
-    slugFromMatch: (m) => (m[1] ? m[1].split('/') : []),
-  },
-  {
-    pattern: /^\/api\/resume(?:\/(.*))?$/,
-    load: () => import('../../api/resume/[[...slug]]'),
-    slugFromMatch: (m) => (m[1] ? m[1].split('/') : []),
-  },
-  {
-    pattern: /^\/api\/profile-photo(?:\/(.*))?$/,
-    load: () => import('../../api/profile-photo/[[...slug]]'),
-    slugFromMatch: (m) => (m[1] ? m[1].split('/') : []),
-  },
-];
-
 const server = http.createServer(async (req, res) => {
   const { pathname } = parse(req.url || '', true);
 
@@ -120,52 +85,49 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  for (const route of routes) {
-    const match = pathname?.match(route.pattern);
-    if (!match) continue;
-
-    try {
-      const { default: handler } = await route.load();
-      const vercelReq = req as VercelRequest;
-      vercelReq.query = {};
-
-      if (route.slugFromMatch && match) {
-        const slug = route.slugFromMatch(match);
-        if (slug && slug.length > 0) {
-          vercelReq.query.slug = slug;
-        }
-      }
-
-      const isMultipartUpload =
-        pathname === '/api/projects/upload' ||
-        pathname === '/api/resume/upload' ||
-        pathname === '/api/profile-photo/upload';
-
-      if (
-        !isMultipartUpload &&
-        req.method !== 'GET' &&
-        req.method !== 'DELETE' &&
-        req.method !== 'OPTIONS'
-      ) {
-        try {
-          vercelReq.body = await readJsonBody(req);
-        } catch {
-          wrapResponse(res).status(400).json({ message: 'Invalid JSON body' });
-          return;
-        }
-      }
-
-      await handler(vercelReq, wrapResponse(res));
-    } catch (error) {
-      console.error(`[dev] Handler error for ${pathname}:`, error);
-      if (!res.headersSent) {
-        wrapResponse(res).status(500).json({ message: 'Internal server error' });
-      }
-    }
+  if (!pathname?.startsWith('/api')) {
+    wrapResponse(res).status(404).json({ message: `Route not found: ${pathname}` });
     return;
   }
 
-  wrapResponse(res).status(404).json({ message: `Route not found: ${pathname}` });
+  try {
+    const { default: handler } = await import('../../api/index');
+    const vercelReq = req as VercelRequest;
+    vercelReq.query = {};
+
+    // Mirror production rewrite: /api/foo/bar → path=foo/bar
+    if (pathname === '/api' || pathname === '/api/') {
+      vercelReq.query.path = '';
+    } else if (pathname.startsWith('/api/')) {
+      vercelReq.query.path = pathname.slice(5);
+    }
+
+    const isMultipartUpload =
+      pathname === '/api/projects/upload' ||
+      pathname === '/api/resume/upload' ||
+      pathname === '/api/profile-photo/upload';
+
+    if (
+      !isMultipartUpload &&
+      req.method !== 'GET' &&
+      req.method !== 'DELETE' &&
+      req.method !== 'OPTIONS'
+    ) {
+      try {
+        vercelReq.body = await readJsonBody(req);
+      } catch {
+        wrapResponse(res).status(400).json({ message: 'Invalid JSON body' });
+        return;
+      }
+    }
+
+    await handler(vercelReq, wrapResponse(res));
+  } catch (error) {
+    console.error(`[dev] Handler error for ${pathname}:`, error);
+    if (!res.headersSent) {
+      wrapResponse(res).status(500).json({ message: 'Internal server error' });
+    }
+  }
 });
 
 server.listen(PORT, () => {
