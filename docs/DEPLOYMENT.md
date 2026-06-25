@@ -125,7 +125,7 @@ Vercel → Project → Settings → Domains → add your domain. No code changes
 
 | Error | Fix |
 |-------|-----|
-| `Function Runtimes must have a valid version` | Do not set `"runtime": "@vercel/node@3"` in `vercel.json` — use `"engines": { "node": "20.x" }` in `package.json` |
+| `Function Runtimes must have a valid version` | Do not set `"runtime": "@vercel/node@3"` in `vercel.json` — use `"engines": { "node": "24.x" }` in `package.json` |
 | `pattern ... doesn't match any Serverless Functions inside the api directory` | API handlers must live in root `api/`, not `backend/api/` |
 | API returns 404 on production | Confirm Root Directory is `.` and env vars are set |
 | Build succeeds but CMS fails | Check Vercel env vars match `backend/.env.example` |

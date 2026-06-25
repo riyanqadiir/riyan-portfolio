@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js 20+ (matches `"engines": { "node": "20.x" }` in root `package.json`)
+- Node.js 24+ (matches `"engines": { "node": "24.x" }` in root `package.json`)
 - npm
 - MongoDB Atlas cluster (or local MongoDB)
 - AWS S3 bucket with `PutObject` / `GetObject` for `projects/*`, `resumes/*`, `profiles/*`
